@@ -1,0 +1,48 @@
+{\rtf1\ansi\ansicpg949\cocoartf2821
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 # grokene_v2_simulation.py\
+# Grokene v2 demo: PySCF simple model + approximate Tc\
+# (Full real sim needs periodic boundary + DFPT; this is illustrative)\
+\
+import pyscf\
+from pyscf import gto, dft\
+from math import exp\
+\
+# Minimal model (small fragment; real: larger supercell)\
+mol = gto.M(\
+    atom='''\
+    C  0.00  0.00  0.00\
+    C  1.42  0.00  0.00\
+    B  0.71  1.23  0.10\
+    N  2.13  1.23  0.10\
+    Al 0.71  2.46  0.20\
+    ''',\
+    basis='def2-svp',\
+    spin=0,\
+    charge=0\
+)\
+\
+mf = dft.RKS(mol)\
+mf.xc = 'b3lyp'\
+mf.kernel()\
+\
+print("DFT energy (example):", mf.e_tot, "Ha")\
+\
+# v2 params\
+lambda_ep = 1.8\
+omega_log = 1800\
+mu_star = 0.1\
+\
+if lambda_ep > 1.0 + mu_star:\
+    exp_val = -1.04 * (1 + lambda_ep) / (lambda_ep - mu_star * (1 + 0.62 * lambda_ep))\
+    tc = (omega_log / 1.2) * exp(exp_val)\
+    print(f"Approx Eliashberg Tc: \{tc:.0f\} K")\
+else:\
+    print("Low coupling")\
+\
+print("Demo only. Wait for official @xxxarcxx code.")}
